@@ -1,7 +1,6 @@
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_groq import ChatGroq
-from langchain_openai import ChatOpenAI
 from langchain_community.graphs import Neo4jGraph
 from langchain_community.graphs.graph_document import GraphDocument,Node,Relationship
 from langchain_core.documents import Document
