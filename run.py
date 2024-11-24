@@ -5,7 +5,7 @@ import logging
 from src.research.tools.arxiv_tool import ArxivSearcher
 from src.research.states.state_query import QueryState
 from src.research.states.state_sugerence import SugerenceState
-from src.research.states.state_graph import GraphState
+from src.research.states.state_graph import KnowledgeGraphState
 from src.research.states.state_constructor import StateConstructor
 
 from src.research.settings import settings
@@ -15,8 +15,10 @@ from src.research.first_search.recommender import recommender_step
 from src.research.first_search.reference_extractor import extract_reference_papers
 from src.research.first_search.query_enhancer import enhance_query
 
-from src.research.retriever.translator_query import ReActRetrieverSystem
-
+from src.research.retriever.translator_query import supervisor_step, type_query
+from src.research.retriever.embedding import embed_step
+from src.research.retriever.cypher import cypher_step
+from src.research.retriever.synthetizer import synth_step
 
 MAX_LEN_CONTEXT_WINDOW = 10
 
@@ -41,6 +43,14 @@ def create_refinement_workflow() -> StateGraph:
     return workflow.compile()
 
 def run_refinement(topic: str) -> Optional[Dict]:
+    """
+    Receives user input in natural language and returns 
+    a List of Strings
+    query: str =  ""
+    reference_papers: List[str] = []
+    source: str = "arxiv"
+    enhanced_queries: List[str] = []
+    """
     try:
         workflow = create_refinement_workflow()
         initial_state = QueryState()
@@ -54,6 +64,18 @@ def run_refinement(topic: str) -> Optional[Dict]:
 # SEARCH
 
 def run_search(queries: List, max_results = 1, sort_by="Relevance"):
+    """
+    Execute queries from enhanced_queries
+    RETURNS A DICT:
+    'title': result.title,
+    'authors': [author.name for author in result.authors],
+    'abstract': result.summary,
+    'published': result.published.strftime("%Y-%m-%d"),
+    'updated': result.updated.strftime("%Y-%m-%d"),
+    'pdf_url': result.pdf_url,
+    'entry_id': result.entry_id,
+    'categories': result.primary_category
+    """
     arxiv_searcher = ArxivSearcher()
     all_results = []
     for enhanced_query in queries:
@@ -84,6 +106,19 @@ def create_sugerence_workflow() -> StateGraph:
     return workflow.compile()
 
 def run_sugerence(papers: Dict) -> Optional[Dict]:
+    """
+    Returns a DICT
+    papers: List[Dict] = []
+    stage: str = ''
+    action: str = ''
+    next: str = ''
+    action: str = ''
+    analysis: str = ''
+    user_input: str = ''
+    queries: List = []
+
+    Debes extraer el valor de "queries", este guarda las queries recomendadas
+    """
     try:
         workflow = create_sugerence_workflow()
         initial_state = SugerenceState()
@@ -133,6 +168,10 @@ def init_constructor_state(papers: List[Dict]) -> StateConstructor:
     )
 
 def run_construction(papers_json) -> Optional[Dict]:
+    """
+    Parameter: papers_json -> JSON
+    This function send the queries to Neo4j to create the Graph
+    """
     papers = json2dict(papers_json)
     try:
         initial_state = init_constructor_state(papers=papers)
@@ -143,8 +182,8 @@ def run_construction(papers_json) -> Optional[Dict]:
 
 # RETRIEVER
 
-def init_retriever_state(topic: str)->GraphState:
-    return GraphState(
+def init_retriever_state(topic: str)->KnowledgeGraphState:
+    return KnowledgeGraphState(
         stage = "init",
         user_input = topic,
         next = "supervisor",
@@ -156,25 +195,25 @@ def init_retriever_state(topic: str)->GraphState:
     )
 
 def retriever_workflow() -> StateGraph:
-    workflow = StateGraph(GraphState)
-    ret = ReActRetrieverSystem()
+    workflow = StateGraph(KnowledgeGraphState)
     # NODES
-    workflow.add_node("supervisor", ret.supervisor_step)
-    workflow.add_node("embedding", ret.embed_step)
-    #workflow.add_node("cypher", ret.cypher_step)
-
+    workflow.add_node("supervisor", supervisor_step)
+    workflow.add_node("embedding", embed_step)
+    workflow.add_node("cypher", cypher_step)
+    workflow.add_node("synthetizer", synth_step)
     # EDGES
-    #workflow.add_conditional_edges(
-    #                                "supervisor",
-     #                               ret.type_query, 
-      #                              {
-       #                                 "embed_step": "embedding",
-        #                                "cypher_step": "cypher"
-         #                           }
-          #                      )
+    workflow.add_conditional_edges(
+                                    "supervisor",
+                                    type_query, 
+                                    {
+                                        "embed_step": "embedding",
+                                        "cypher_step": "cypher"
+                                    }
+                                )
     workflow.add_edge("supervisor","embedding")
-    workflow.add_edge("embedding", END)
-    #workflow.add_edge("cypher", END)
+    workflow.add_edge("embedding", "synthetizer")
+    workflow.add_edge("cypher", "synthetizer")
+    workflow.add_edge("synthetizer", END)
     workflow.set_entry_point("supervisor")
     return workflow.compile()
 
