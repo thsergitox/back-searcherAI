@@ -43,6 +43,14 @@ def create_refinement_workflow() -> StateGraph:
     return workflow.compile()
 
 def run_refinement(topic: str) -> Optional[Dict]:
+    """
+    Receives user input in natural language and returns 
+    a List of Strings
+    query: str =  ""
+    reference_papers: List[str] = []
+    source: str = "arxiv"
+    enhanced_queries: List[str] = []
+    """
     try:
         workflow = create_refinement_workflow()
         initial_state = QueryState()
@@ -56,6 +64,18 @@ def run_refinement(topic: str) -> Optional[Dict]:
 # SEARCH
 
 def run_search(queries: List, max_results = 1, sort_by="Relevance"):
+    """
+    Execute queries from enhanced_queries
+    RETURNS A DICT:
+    'title': result.title,
+    'authors': [author.name for author in result.authors],
+    'abstract': result.summary,
+    'published': result.published.strftime("%Y-%m-%d"),
+    'updated': result.updated.strftime("%Y-%m-%d"),
+    'pdf_url': result.pdf_url,
+    'entry_id': result.entry_id,
+    'categories': result.primary_category
+    """
     arxiv_searcher = ArxivSearcher()
     all_results = []
     for enhanced_query in queries:
@@ -86,6 +106,19 @@ def create_sugerence_workflow() -> StateGraph:
     return workflow.compile()
 
 def run_sugerence(papers: Dict) -> Optional[Dict]:
+    """
+    Returns a DICT
+    papers: List[Dict] = []
+    stage: str = ''
+    action: str = ''
+    next: str = ''
+    action: str = ''
+    analysis: str = ''
+    user_input: str = ''
+    queries: List = []
+
+    Debes extraer el valor de "queries", este guarda las queries recomendadas
+    """
     try:
         workflow = create_sugerence_workflow()
         initial_state = SugerenceState()
@@ -135,6 +168,10 @@ def init_constructor_state(papers: List[Dict]) -> StateConstructor:
     )
 
 def run_construction(papers_json) -> Optional[Dict]:
+    """
+    Parameter: papers_json -> JSON
+    This function send the queries to Neo4j to create the Graph
+    """
     papers = json2dict(papers_json)
     try:
         initial_state = init_constructor_state(papers=papers)

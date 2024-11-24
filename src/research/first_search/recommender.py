@@ -52,7 +52,6 @@ def recommender_step(state: Dict[str, Any]) -> Dict[str, Any]:
         return state
     
     except Exception as e:
-        state["recommendations"] = []
         state["queries"] = []
         state["stage"] = ResearchStage.RECOMMENDATION.value
         return state
