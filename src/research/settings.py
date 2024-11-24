@@ -2,12 +2,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from groq import Groq
 from openai import OpenAI
+from neo4j import GraphDatabase
 
 class Settings(BaseSettings):
     """Application settings with validation using Pydantic"""
     # API Keys and Credentials
     openai_api_key: str
     groq_api_key: str
+
     # Research Configuration
     max_search_results: int = Field(default=5, ge=1)
     max_scrape_retries: int = Field(default=3, ge=1)
@@ -59,3 +61,10 @@ URL = settings.url
 
 client_groq = Groq(api_key = settings.groq_api_key)
 client_openai = OpenAI(api_key= settings.openai_api_key)
+neo4j_driver = GraphDatabase.driver(
+                                settings.url, 
+                                auth = (
+                                        settings.username, 
+                                        settings.password
+                                        )
+                            )

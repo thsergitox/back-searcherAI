@@ -5,7 +5,7 @@ import logging
 from src.research.tools.arxiv_tool import ArxivSearcher
 from src.research.states.state_query import QueryState
 from src.research.states.state_sugerence import SugerenceState
-from src.research.states.state_graph import GraphState
+from src.research.states.state_graph import KnowledgeGraphState
 from src.research.states.state_constructor import StateConstructor
 
 from src.research.settings import settings
@@ -15,8 +15,10 @@ from src.research.first_search.recommender import recommender_step
 from src.research.first_search.reference_extractor import extract_reference_papers
 from src.research.first_search.query_enhancer import enhance_query
 
-from src.research.retriever.translator_query import ReActRetrieverSystem
-
+from src.research.retriever.translator_query import supervisor_step, type_query
+from src.research.retriever.embedding import embed_step
+from src.research.retriever.cypher import cypher_step
+from src.research.retriever.synthetizer import synth_step
 
 MAX_LEN_CONTEXT_WINDOW = 10
 
@@ -143,8 +145,8 @@ def run_construction(papers_json) -> Optional[Dict]:
 
 # RETRIEVER
 
-def init_retriever_state(topic: str)->GraphState:
-    return GraphState(
+def init_retriever_state(topic: str)->KnowledgeGraphState:
+    return KnowledgeGraphState(
         stage = "init",
         user_input = topic,
         next = "supervisor",
@@ -156,25 +158,25 @@ def init_retriever_state(topic: str)->GraphState:
     )
 
 def retriever_workflow() -> StateGraph:
-    workflow = StateGraph(GraphState)
-    ret = ReActRetrieverSystem()
+    workflow = StateGraph(KnowledgeGraphState)
     # NODES
-    workflow.add_node("supervisor", ret.supervisor_step)
-    workflow.add_node("embedding", ret.embed_step)
-    #workflow.add_node("cypher", ret.cypher_step)
-
+    workflow.add_node("supervisor", supervisor_step)
+    workflow.add_node("embedding", embed_step)
+    workflow.add_node("cypher", cypher_step)
+    workflow.add_node("synthetizer", synth_step)
     # EDGES
-    #workflow.add_conditional_edges(
-    #                                "supervisor",
-     #                               ret.type_query, 
-      #                              {
-       #                                 "embed_step": "embedding",
-        #                                "cypher_step": "cypher"
-         #                           }
-          #                      )
+    workflow.add_conditional_edges(
+                                    "supervisor",
+                                    type_query, 
+                                    {
+                                        "embed_step": "embedding",
+                                        "cypher_step": "cypher"
+                                    }
+                                )
     workflow.add_edge("supervisor","embedding")
-    workflow.add_edge("embedding", END)
-    #workflow.add_edge("cypher", END)
+    workflow.add_edge("embedding", "synthetizer")
+    workflow.add_edge("cypher", "synthetizer")
+    workflow.add_edge("synthetizer", END)
     workflow.set_entry_point("supervisor")
     return workflow.compile()
 
