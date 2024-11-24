@@ -3,7 +3,12 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 import logging
 
+<<<<<<< HEAD:src/research/retriever/translator_query.py
 from src.research.settings import settings
+=======
+from app.research.settings import settings
+from app.research.settings import client_openai
+>>>>>>> 3918bbc (Implement FastAPI routing and restructure application files):src/app/research/retriever/translator_query.py
 
 # Use settings for logging configuration
 logging.basicConfig(level=settings.log_level)
