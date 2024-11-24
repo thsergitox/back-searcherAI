@@ -105,6 +105,7 @@ def create_sugerence_workflow() -> StateGraph:
     workflow.add_edge("recommend", END) 
     return workflow.compile()
 
+
 def run_sugerence(papers: Dict) -> Optional[Dict]:
     """
     Returns a DICT
