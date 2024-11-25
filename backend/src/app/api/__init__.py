@@ -1,4 +1,4 @@
-from app.api.v1._init__ import router as router_v1
+from app.api.v1 import router as router_v1
 from fastapi import APIRouter
 
 router = APIRouter()

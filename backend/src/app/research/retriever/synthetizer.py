@@ -1,7 +1,7 @@
 from typing import Dict, List
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
-from src.research.settings import settings
+from app.research.settings import settings
 
 def format_embedding_results(results: List[Dict]) -> str:
     """Format embedding results into a readable context string"""
@@ -34,8 +34,7 @@ def format_cypher_results(results: List[Dict]) -> str:
                     else:  # Relationship
                         formatted_record.append(f"{key} (Relationship - {value['type']}): {props_str}")
             else:
-                formatted_record.append(f"{key}: {value}")
-                
+                formatted_record.append(f"{key}: {value}") 
         formatted_results.append("\n".join(formatted_record))
     
     return "\n\n".join(formatted_results)
@@ -79,11 +78,6 @@ def synth_step(state: Dict) -> Dict:
         elif state.get("cypher_result"):
             formatted_context = format_cypher_results(state["cypher_result"])
         else:
-            state.update({
-                "stage": "synthetizer",
-                "next": "END",
-                "answer": "No results available to synthesize an answer."
-            })
             return state
 
         # Generate answer using LLM
@@ -93,26 +87,15 @@ def synth_step(state: Dict) -> Dict:
                 query=state["user_input"]
             )
         )
-
         # Update state with results
-        state.update({
-            "stage": "synthetizer",
-            "next": "END",
-            "answer": answer
-        })
-
+        state["stage"] = "synthetizer"
+        state["next"] = "END",
+        state["answer"] = answer
         return state
 
     except Exception as e:
-        # Handle errors gracefully
-        state.update({
-            "stage": "synthetizer_error",
-            "next": "END",
-            "answer": f"Error during synthesis: {str(e)}",
-            "error": str(e)
-        })
-        
-        # Log the error
+        state["stage"] = "synthetizer_error"
+        state["next"] = "END",
+        state["answer"] = f"Error during synthesis: {str(e)}"
         print(f"Error in synth_step: {str(e)}")
-        
         return state

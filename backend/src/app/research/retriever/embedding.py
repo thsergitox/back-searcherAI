@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial.distance import cosine
 from typing import Dict
 
-from src.research.settings import client_openai, settings, neo4j_driver
+from app.research.settings import client_openai, settings, neo4j_driver
 
 def get_embedding(text, model: str = "text-embedding-ada-002"):
     embedding_result = client_openai.embeddings.create(

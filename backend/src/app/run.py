@@ -5,7 +5,7 @@ import logging
 from app.research.tools.arxiv_tool import ArxivSearcher
 from app.research.states.state_query import QueryState
 from app.research.states.state_sugerence import SugerenceState
-from app.research.states.state_graph import GraphState
+from app.research.states.state_graph import KnowledgeGraphState
 from app.research.states.state_constructor import StateConstructor
 
 from app.research.settings import settings
@@ -15,8 +15,10 @@ from app.research.first_search.recommender import recommender_step
 from app.research.first_search.reference_extractor import extract_reference_papers
 from app.research.first_search.query_enhancer import enhance_query
 
-from app.research.retriever.translator_query import ReActRetrieverSystem
-
+from app.research.retriever.translator_query import supervisor_step, type_query
+from app.research.retriever.embedding import embed_step
+from app.research.retriever.cypher import cypher_step
+from app.research.retriever.synthetizer import synth_step
 
 MAX_LEN_CONTEXT_WINDOW = 10
 
@@ -83,41 +85,17 @@ def create_sugerence_workflow() -> StateGraph:
     workflow.add_edge("recommend", END) 
     return workflow.compile()
 
-
-def run_sugerence(papers: Dict) -> Optional[Dict]:
+def run_sugerence(papers: List[Dict]) -> Optional[Dict]:
     try:
         workflow = create_sugerence_workflow()
         initial_state = SugerenceState()
         initial_state["papers"] = papers
-        response = workflow.invoke(initial_state)
-        response.pop("papers")
-        return  response # Run the workflow
+        return workflow.invoke(initial_state) # Run the workflow
     except Exception as e:
         logger.error(f"x - Error during sugerence: {e}")
         return None
 
-
 # GRAPH CONSTRUCTOR
-
-def json2dict(result) -> Dict:
-    """
-    Converts a paper result object to a dictionary format.
-    Args:
-        result: Paper result object containing paper metadata
-    Returns:
-        PaperDict: Dictionary containing formatted paper data
-    """
-    paper_dict = {
-        'title': result.title,
-        'authors': [author.name for author in result.authors],
-        'abstract': result.summary,
-        'published': result.published.strftime("%Y-%m-%d"),
-        'updated': result.updated.strftime("%Y-%m-%d"),
-        'pdf_url': result.pdf_url,
-        'entry_id': result.entry_id,
-        'categories': result.primary_category
-    }
-    return paper_dict
 
 def init_constructor_state(papers: List[Dict]) -> StateConstructor:
     """
@@ -135,8 +113,7 @@ def init_constructor_state(papers: List[Dict]) -> StateConstructor:
         source='arxiv'
     )
 
-def run_construction(papers_json) -> Optional[Dict]:
-    papers = json2dict(papers_json)
+def run_construction(papers: List[Dict]) -> Optional[Dict]:
     try:
         initial_state = init_constructor_state(papers=papers)
         return translator_step(initial_state)
@@ -146,46 +123,47 @@ def run_construction(papers_json) -> Optional[Dict]:
 
 # RETRIEVER
 
-def init_retriever_state(topic: str)->GraphState:
-    return GraphState(
-        stage = "init",
+def init_retriever_state(topic: str)->KnowledgeGraphState:
+    return KnowledgeGraphState(
+        stage = "",
+        next = "",
         user_input = topic,
-        next = "supervisor",
-        top_k = 5,
+        top_k = 1,
         similarity_threshold= 0.7,
-        query_type = None,
-        embeddings_result = None,
-        cypher_result = None
+        query_type = [],
+        embeddings_result = [],
+        cypher_result = [],
+        answer=''
     )
 
 def retriever_workflow() -> StateGraph:
-    workflow = StateGraph(GraphState)
-    ret = ReActRetrieverSystem()
+    workflow = StateGraph(KnowledgeGraphState)
     # NODES
-    workflow.add_node("supervisor", ret.supervisor_step)
-    workflow.add_node("embedding", ret.embed_step)
-    #workflow.add_node("cypher", ret.cypher_step)
-
+    workflow.add_node("supervisor", supervisor_step)
+    workflow.add_node("embedding", embed_step)
+    workflow.add_node("cypher", cypher_step)
+    workflow.add_node("synthetizer", synth_step)
     # EDGES
-    #workflow.add_conditional_edges(
-    #                                "supervisor",
-     #                               ret.type_query, 
-      #                              {
-       #                                 "embed_step": "embedding",
-        #                                "cypher_step": "cypher"
-         #                           }
-          #                      )
+    workflow.add_conditional_edges(
+                                    "supervisor",
+                                    type_query, 
+                                    {
+                                        "embed_step": "embedding",
+                                        "cypher_step": "cypher"
+                                    }
+                                )
     workflow.add_edge("supervisor","embedding")
-    workflow.add_edge("embedding", END)
-    #workflow.add_edge("cypher", END)
+    workflow.add_edge("embedding", "synthetizer")
+    workflow.add_edge("cypher", "synthetizer")
+    workflow.add_edge("synthetizer", END)
     workflow.set_entry_point("supervisor")
     return workflow.compile()
 
 def query_graph(topic: str) -> Optional[Dict]:
     try:
+        logger.warning(topic)
         workflow = retriever_workflow()
         initial_state = init_retriever_state(topic=topic)
         return workflow.invoke(initial_state) # Run the workflow
     except Exception as e:
         logger.error(f"y - Error during retrieve: {e}")
-

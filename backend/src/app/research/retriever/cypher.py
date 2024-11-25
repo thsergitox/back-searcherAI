@@ -2,7 +2,7 @@ from langchain.prompts import PromptTemplate
 from langchain_groq import ChatGroq
 from langchain_community.graphs import Neo4jGraph
 from typing import Dict, List, Any
-from src.research.settings import neo4j_driver, settings
+from app.research.settings import neo4j_driver, settings
 from neo4j.graph import Node, Relationship
 
 def node_to_dict(node: Node) -> Dict[str, Any]:
@@ -48,6 +48,7 @@ def cypher_step(state: Dict) -> Dict:
     """
     Execute Cypher query and store results in state
     """
+    state["next"] = "synthetizer"
     try:
         # Initialize LLM and graph
         llm = ChatGroq(
@@ -93,7 +94,7 @@ def cypher_step(state: Dict) -> Dict:
             question=state["user_input"]
         )
         cypher_query = llm.predict(rendered_prompt)
-
+        
         # Execute query and process results
         results: List[Dict[str, Any]] = []
         with neo4j_driver.session() as session:
@@ -109,15 +110,12 @@ def cypher_step(state: Dict) -> Dict:
                 results.append(processed_record)
 
         # Update state with results
-        state["stage"] = "cypher_complete"
-        state["next"] = "end"
         state["query_type"] = "cypher_step"
         state["cypher_result"] = results
         return state
 
     except Exception as e:
         error_state = state.copy()
-        error_state["stage"] = "cypher_error"
         error_state["next"] = "end"
         error_state["query_type"] = "cypher_step"
         error_state["cypher_result"] = []
