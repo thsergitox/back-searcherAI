@@ -65,9 +65,7 @@ def run_search(queries: List, max_results = 1, sort_by="Relevance"):
                         sort_by=sort_by)
         all_results.extend(results)
     # Remove duplicates based on entry_id
-    unique_results = list({
-            paper['entry_id']: paper for paper in all_results
-        }.values())
+    unique_results = list({paper['entry_id']: paper for paper in all_results}.values())
     
     return unique_results
 
@@ -101,6 +99,8 @@ def run_sugerence(papers: List[Dict]) -> Optional[Dict]:
         workflow = create_sugerence_workflow()
         initial_state = SugerenceState()
         initial_state["papers"] = papers
+        response = workflow.invoke(initial_state) # Run the workflow
+        response.pop()
         return workflow.invoke(initial_state) # Run the workflow
     except Exception as e:
         logger.error(f"x - Error during sugerence: {e}")
