@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import NeoVis, { NeovisConfig } from "neovis.js";
 import { Card } from "@/components/ui/card";
+import { LabelGroup } from "@/components/LabelGroup";
 import { Neo4jConfig, DEFAULT_CONFIG } from "@/lib/neo4j-config";
 
 interface GraphProps {
@@ -20,25 +21,15 @@ export function Graph({ config = {}, className = "" }: GraphProps) {
       const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
       const neovisConfig: NeovisConfig = {
-        container_id: visRef.current.id,
+        containerId: visRef.current.id,
         server_url: finalConfig.serverUrl,
         server_user: finalConfig.serverUser,
         server_password: finalConfig.serverPassword,
         initial_cypher: finalConfig.initialCypher,
         labels: {
           Node: {
-            caption: "name",
-            size: "pagerank",
-            community: "community",
-          },
+            size: "pagerank",          },
         },
-        relationships: {
-          RELATES_TO: {
-            thickness: "weight",
-            caption: true,
-          },
-        },
-        initial_cypher: finalConfig.initialCypher,
         visConfig: {
           nodes: {
             shape: "circle",
@@ -74,7 +65,10 @@ export function Graph({ config = {}, className = "" }: GraphProps) {
         id="neovis" 
         ref={visRef} 
         className="w-full h-full bg-gray-800 rounded-lg"
-      />
+      >
+      <LabelGroup/>
+
+      </div>
     </Card>
   );
 }
