@@ -38,7 +38,7 @@ def supervisor_step(state: Dict)->Dict:
     return state
 
 def type_query(state: Dict)->str:
-    logger.warning(state["next"])
+    state["next"] = "embed_step" #gaaa
     return state["next"]
     
 

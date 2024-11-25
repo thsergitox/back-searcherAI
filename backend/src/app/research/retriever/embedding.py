@@ -3,6 +3,11 @@ from scipy.spatial.distance import cosine
 from typing import Dict
 
 from app.research.settings import client_openai, settings, neo4j_driver
+import logging
+
+# Use settings for logging configuration
+logging.basicConfig(level=settings.log_level)
+logger = logging.getLogger(__name__)
 
 def get_embedding(text, model: str = "text-embedding-ada-002"):
     embedding_result = client_openai.embeddings.create(

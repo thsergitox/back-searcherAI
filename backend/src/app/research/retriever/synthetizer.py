@@ -3,17 +3,22 @@ from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 from app.research.settings import settings
 
+import logging
+
+# Use settings for logging configuration
+logging.basicConfig(level=settings.log_level)
+logger = logging.getLogger(__name__)
+
 def format_embedding_results(results: List[Dict]) -> str:
     """Format embedding results into a readable context string"""
     formatted_contexts = []
     for idx, result in enumerate(results, 1):
-        content = result.get('content', '')
-        source = result.get('source', 'Unknown')
-        similarity = result.get('similarity', 0)
+        content = result.get('abstract', '')
+        source = result.get('title', 'Unknown')
+        similarity = result.get('similarity_score', 0)
         formatted_contexts.append(
-            f"Document {idx}:\n"
-            f"Content: {content}\n"
             f"Source: {source}\n"
+            f"Content: {content}\n"
             f"Relevance Score: {similarity:.2f}\n"
         )
     return "\n".join(formatted_contexts)
@@ -46,13 +51,12 @@ def synth_step(state: Dict) -> Dict:
     try:
         llm = ChatGroq(
             model=settings.groq_model,
-            temperature=0,
+            temperature=0.3,
             api_key=settings.groq_api_key
         )
 
         # Enhanced prompt template with better instruction and structure
-        prompt = PromptTemplate(
-            template="""
+        template = """
             Based on the following context information, provide a comprehensive answer to the user's query.
             
             Context Information:
@@ -68,9 +72,8 @@ def synth_step(state: Dict) -> Dict:
             4. Use a clear and concise writing style
             
             Answer:
-            """,
-            input_variables=["context", "query"]
-        )
+            """
+        prompt = PromptTemplate(template=template, input_variables=["context","query"])
 
         # Process results based on type
         if state.get("embedding_result"):
@@ -79,22 +82,14 @@ def synth_step(state: Dict) -> Dict:
             formatted_context = format_cypher_results(state["cypher_result"])
         else:
             return state
-
         # Generate answer using LLM
-        answer = llm.predict(
-            prompt.format(
-                context=formatted_context,
-                query=state["user_input"]
-            )
-        )
-        # Update state with results
-        state["stage"] = "synthetizer"
+        chain = prompt | llm
+        answer = chain.invoke({"context": formatted_context, "query": state["user_input"]}).content
         state["next"] = "END",
         state["answer"] = answer
         return state
 
     except Exception as e:
-        state["stage"] = "synthetizer_error"
         state["next"] = "END",
         state["answer"] = f"Error during synthesis: {str(e)}"
         print(f"Error in synth_step: {str(e)}")
