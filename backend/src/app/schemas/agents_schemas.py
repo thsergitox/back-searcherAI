@@ -116,3 +116,19 @@ class SuccessResponse(BaseModel):
                 "message": "Operation completed successfully"
             }
         }
+
+
+class SearchResponse(BaseModel):
+    data: List[Dict]
+    message: str = "Operation completed successfully"
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "data": {
+                    "results": ["Paper 1", "Paper 2"],
+                    "metadata": {"total_count": 2}
+                },
+                "message": "Operation completed successfully"
+            }
+        }

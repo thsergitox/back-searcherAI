@@ -65,11 +65,7 @@ def run_search(queries: List, max_results = 1, sort_by="Relevance"):
                         sort_by=sort_by)
         all_results.extend(results)
     # Remove duplicates based on entry_id
-    unique_results = [
-    {
-        paper['entry_id']: paper for paper in all_results
-    }.values()
-    ]
+    unique_results = list({paper['entry_id']: paper for paper in all_results}.values())
     
     return unique_results
 

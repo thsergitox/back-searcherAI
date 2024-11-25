@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.schemas.agents_schemas import (
     RefinementRequest, SearchRequest, SugerenceRequest, 
     ConstructionRequest, QueryGraphRequest, 
-    ErrorResponse, SuccessResponse
+    ErrorResponse, SuccessResponse, SearchResponse
 )
 from app.run import (
     run_refinement, run_search, run_sugerence, 
@@ -18,7 +18,7 @@ async def refinement_endpoint(request: RefinementRequest):
         raise HTTPException(status_code=400, detail="Refinement process failed")
     return SuccessResponse(data=result)
 
-@router.post("/run-search", response_model=SuccessResponse)
+@router.post("/run-search", response_model=SearchResponse)
 async def search_endpoint(request: SearchRequest):
     result = run_search(
         request.queries,
@@ -27,7 +27,7 @@ async def search_endpoint(request: SearchRequest):
     )
     if not result:
         raise HTTPException(status_code=400, detail="Search process failed")
-    return SuccessResponse(data=result)
+    return SearchResponse(data=result)
 
 @router.post("/run-sugerence", response_model=SuccessResponse)
 async def sugerence_endpoint(request: SugerenceRequest):
