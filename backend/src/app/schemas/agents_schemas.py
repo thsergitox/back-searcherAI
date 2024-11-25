@@ -156,3 +156,63 @@ class SearchResponse(BaseModel):
                 "message": "Operation completed successfully"
             }
         }
+
+class RefinementResponse(BaseModel):
+    data: Dict
+    message: str = "Operation completed successfully"
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "data": {
+                    "query": "quantum computing applications in cryptography",
+                    "reference_papers": [
+                    "\"Quantum Cryptography and the Security of Quantum Communications\" by Gilles Brassard and Claude Crépeau (1991)",
+                    "\"Quantum Computation and Quantum Information\" by Michael A. Nielsen and Isaac L. Chuang (2000)",
+                    "\"Quantum Cryptography with Imperfect Apparatus\" by Artur Ekert (1991)",
+                    "\"Cryptanalysis of Some Cryptosystems Based on Quantum Computation\" by Peter W. Shor (1994)",
+                    "\"Quantum Algorithms for Lattice Problems\" by Peter W. Shor (1994)",
+                    "\"Quantum Cryptography with Entangled Photons\" by Charles H. Bennett et al. (1992)",
+                    "\"Quantum Computation and Cryptography\" by David Deutsch (1985)"
+                    ],
+                    "enhanced_queries": [
+                    "Quantum Cryptography and the Security of Quantum Communications",
+                    "Quantum Computation and Quantum Information",
+                    "Quantum Cryptography with Imperfect Apparatus",
+                    "Cryptanalysis of Some Cryptosystems Based on Quantum Computation",
+                    "Quantum Algorithms for Lattice Problems",
+                    "Quantum Cryptography with Entangled Photons",
+                    "David Deutsch's work on Quantum Computation and Cryptography",
+                    "Applications of Quantum Computing in Public-Key Cryptography",
+                    "Quantum Key Distribution (QKD) protocols for secure communication",
+                    "Exploring the potential of Quantum Computing for breaking classical encryption algorithms"
+                    ]
+                }
+                ,
+                "message": "Operation completed successfully"
+            }
+        }
+
+
+class SugerenceResponse(BaseModel):
+    data: Dict
+    message: str = "Operation completed successfully"
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "data": {
+                    "stage": "recommendation",
+                    "queries": [
+                    "Vision Transformers for object detection on smaller datasets",
+                    "Hybrid vision transformers for medical image analysis",
+                    "Comparison of Vision Transformers with traditional CNN architectures for image segmentation",
+                    "Recent advances in multi-scale processing and convolution for computer vision tasks",
+                    "Exploring the role of attention mechanisms and positional embeddings in Vision Transformers for natural language processing"
+                    ],
+                    "analysis": "After analyzing the two papers, I have identified the following common themes and research directions:\n\n1. **Vision Transformers (ViT) and their variants**: Both papers focus on the recent advances in Vision Transformers and their variants, such as Data Efficient Image Transformer (DeiT), Class Attention in Image Transformer (CaiT), and Swin Transformers. This suggests that researchers are interested in exploring the capabilities and limitations of these architectures.\n\n2. **Image classification on smaller datasets**: The first paper specifically highlights the performance of Vision Transformers on Tiny ImageNet, a smaller dataset compared to ImageNet-1k. This indicates that researchers are interested in evaluating the performance of these architectures on smaller datasets, which is important for real-world applications where large datasets may not be available.\n\n3. **Hybrid vision transformers**: The second paper emphasizes the importance of hybrid vision transformers, which combine the strengths of convolutional neural networks (CNNs) and self-attention mechanisms. This suggests that researchers are interested in exploring the potential of these hybrid architectures for computer vision tasks.\n\n4. **Transfer learning and fine-tuning**: Both papers mention the importance of transfer learning and fine-tuning for Vision Transformers. This indicates that researchers are interested in understanding how to effectively adapt these architectures to new tasks and datasets.\n\n5. **Comparison with traditional CNN architectures**: The first paper mentions that Vision Transformers have largely closed the gap with traditional CNN architectures, while the second paper highlights the potential of hybrid vision transformers to deliver exceptional performance across a range of computer vision tasks. This suggests that researchers are interested in comparing the performance of Vision Transformers with traditional CNN architectures.\n\n6. **Exploration of attention mechanisms and positional embeddings**: The second paper discusses the key features of hybrid vision transformers, including attention mechanisms and positional embeddings. This suggests that researchers are interested in understanding the role of these components in the performance of Vision Transformers.\n\n7. **Multi-scale processing and convolution**: The second paper also mentions the importance of multi-scale processing and convolution in hybrid vision transformers. This suggests that researchers are interested in exploring the potential of these components for computer vision tasks.\n\n8. **Future directions and taxonomy**: The second paper provides a taxonomy of recent vision transformer architectures and highlights the emerging trend of hybrid vision transformers. This suggests that researchers are interested in understanding the current state-of-the-art and exploring future directions for this rapidly evolving architecture.\n\nOverall, these papers suggest that researchers are interested in exploring the capabilities and limitations of Vision Transformers and their variants, as well as their potential applications in computer vision tasks."
+                }
+                ,
+                "message": "Operation completed successfully"
+            }
+        }
