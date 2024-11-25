@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from app.schemas.agents_schemas import (
     RefinementRequest, SearchRequest, SugerenceRequest, 
     ConstructionRequest, QueryGraphRequest, 
-    ErrorResponse, SuccessResponse, SearchResponse
+    ErrorResponse, SuccessResponse, SearchResponse,
+    RefinementResponse, SugerenceResponse
 )
 from app.run import (
     run_refinement, run_search, run_sugerence, 
@@ -11,12 +12,12 @@ from app.run import (
 
 router = APIRouter()
 
-@router.post("/run-refinement", response_model=SuccessResponse)
+@router.post("/run-refinement", response_model=RefinementResponse)
 async def refinement_endpoint(request: RefinementRequest):
     result = run_refinement(request.topic)
     if not result:
         raise HTTPException(status_code=400, detail="Refinement process failed")
-    return SuccessResponse(data=result)
+    return RefinementResponse(data=result)
 
 @router.post("/run-search", response_model=SearchResponse)
 async def search_endpoint(request: SearchRequest):
@@ -29,12 +30,12 @@ async def search_endpoint(request: SearchRequest):
         raise HTTPException(status_code=400, detail="Search process failed")
     return SearchResponse(data=result)
 
-@router.post("/run-sugerence", response_model=SuccessResponse)
+@router.post("/run-sugerence", response_model=SugerenceResponse)
 async def sugerence_endpoint(request: SugerenceRequest):
     result = run_sugerence(request.papers)
     if not result:
         raise HTTPException(status_code=400, detail="Sugerence process failed")
-    return SuccessResponse(data=result)
+    return SugerenceResponse(data=result)
 
 @router.post("/run-construction", response_model=SuccessResponse)
 async def construction_endpoint(request: ConstructionRequest):

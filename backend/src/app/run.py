@@ -99,7 +99,9 @@ def run_sugerence(papers: List[Dict]) -> Optional[Dict]:
         workflow = create_sugerence_workflow()
         initial_state = SugerenceState()
         initial_state["papers"] = papers
-        return workflow.invoke(initial_state) # Run the workflow
+        response = workflow.invoke(initial_state) # Run the workflow
+        response.pop("papers")
+        return response # Run the workflow
     except Exception as e:
         logger.error(f"x - Error during sugerence: {e}")
         return None
