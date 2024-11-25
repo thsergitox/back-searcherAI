@@ -125,10 +125,34 @@ class SearchResponse(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "data": {
-                    "results": ["Paper 1", "Paper 2"],
-                    "metadata": {"total_count": 2}
-                },
+                "data": [
+                    {
+                    "title": "Quantum Cryptography for Enhanced Network Security: A Comprehensive Survey of Research, Developments, and Future Directions",
+                    "authors": [
+                        "Mst Shapna Akter"
+                    ],
+                    "abstract": "With the ever-growing concern for internet security, the field of quantum\ncryptography emerges as a promising solution for enhancing the security of\nnetworking systems. In this paper, 20 notable papers from leading conferences\nand journals are reviewed and categorized based on their focus on various\naspects of quantum cryptography, including key distribution, quantum bit\ncommitment, post quantum cryptography, and counterfactual quantum key\ndistribution. The paper explores the motivations and challenges of employing\nquantum cryptography, addressing security and privacy concerns along with\nexisting solutions. Secure key distribution, a critical component in ensuring\nthe confidentiality and integrity of transmitted information over a network, is\nemphasized in the discussion. The survey examines the potential of quantum\ncryptography to enable secure key exchange between parties, even when faced\nwith eavesdropping, and other applications of quantum cryptography.\nAdditionally, the paper analyzes the methodologies, findings, and limitations\nof each reviewed study, pinpointing trends such as the increasing focus on\npractical implementation of quantum cryptography protocols and the growing\ninterest in postquantum cryptography research. Furthermore, the survey\nidentifies challenges and open research questions, including the need for more\nefficient quantum repeater networks, improved security proofs for continuous\nvariable quantum key distribution, and the development of quantum resistant\ncryptographic algorithms.",
+                    "published": "2023-06-02",
+                    "updated": "2023-06-02",
+                    "pdf_url": "http://arxiv.org/pdf/2306.09248v1",
+                    "entry_id": "http://arxiv.org/abs/2306.09248v1",
+                    "categories": "cs.CR"
+                    },
+                    {
+                    "title": "Quantum-Resistant Cryptography",
+                    "authors": [
+                        "John Preuß Mattsson",
+                        "Ben Smeets",
+                        "Erik Thormarker"
+                    ],
+                    "abstract": "Quantum-resistant cryptography is cryptography that aims to deliver\ncryptographic functions and protocols that remain secure even if large-scale\nfault-tolerant quantum computers are built. NIST will soon announce the first\nselected public-key cryptography algorithms in its Post-Quantum Cryptography\n(PQC) standardization which is the most important current effort in the field\nof quantum-resistant cryptography. This report provides an overview to security\nexperts who do not yet have a deep understanding of quantum-resistant\ncryptography. It surveys the computational model of quantum computers; the\nquantum algorithms that affect cryptography the most; the risk of\nCryptographically Relevant Quantum Computers (CRQCs) being built; the security\nof symmetric and public-key cryptography in the presence of CRQCs; the NIST PQC\nstandardization effort; the migration to quantum-resistant public-key\ncryptography; the relevance of Quantum Key Distribution as a complement to\nconventional cryptography; and the relevance of Quantum Random Number\nGenerators as a complement to current hardware Random Number Generators.",
+                    "published": "2021-12-01",
+                    "updated": "2021-12-01",
+                    "pdf_url": "http://arxiv.org/pdf/2112.00399v1",
+                    "entry_id": "http://arxiv.org/abs/2112.00399v1",
+                    "categories": "cs.CR"
+                    }
+                ],
                 "message": "Operation completed successfully"
             }
         }
