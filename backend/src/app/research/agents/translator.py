@@ -34,9 +34,9 @@ class Translator:
         )
 
         self.neo4j_db = Neo4jGraph(
-            url = "url",#settings.url,
-            username= "neo4j",#settings.username,
-            password = "pass"#settings.password
+            url = settings.url,
+            username= settings.username,
+            password = settings.password
         )
 
         # GRAPH SETTINGS
