@@ -15,6 +15,6 @@ EXPOSE 8000
 # Copy the application code
 COPY app/ /src/app/
 COPY tests/ /src/tests/
-COPY .env /src/.env
+# COPY .env /src/.env
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
